@@ -18,9 +18,9 @@ import (
 
 // 絵の構造体
 type Picture struct {
-	id		string
-	title	string
-	path	string
+	ID		string
+	Title	string
+	Path	string
 }
 
 // 絵の格納用配列
@@ -34,7 +34,7 @@ func getBooks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(pictures)
 }
 
-// 特定の絵の取得
+// 特定の絵の情報取得
 func getPicture(w http.ResponseWriter, r *http.Request) {
 	// ヘッダをセット
 	t, err := template.ParseFiles("template/index.html")
@@ -55,20 +55,12 @@ func getPicture(w http.ResponseWriter, r *http.Request) {
 
 	pictureData := dsnap.Data()
 
-	fmt.Printf("value : %v\n", pictureData["title"].(string))
-	fmt.Printf("type : %T\n", dsnap.Data())
-
 	// テンプレート
-	err = t.Execute(w, struct{
-		Title	string
-		Path	string
-	}{
+	err = t.Execute(w, Picture{
+		ID: pictureData["id"].(string),
 		Title: pictureData["title"].(string),
 		Path: pictureData["path"].(string),
 	})
-
-	json.NewEncoder(w).Encode(&Picture{})
-
 }
 
 // Create a Book
@@ -77,7 +69,7 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 
 	var picture Picture
 	_ = json.NewDecoder(r.Body).Decode(&picture)
-	picture.id = strconv.Itoa(rand.Intn(10000)) // Mock ID - not safe in production
+	picture.ID = strconv.Itoa(rand.Intn(10000)) // Mock ID - not safe in production
 	pictures = append(pictures, picture)
 	json.NewEncoder(w).Encode(picture)
 }
@@ -89,11 +81,11 @@ func updateBook(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	for index, item := range pictures {
-		if item.id == params["id"] {
+		if item.ID == params["id"] {
 			pictures = append(pictures[:index], pictures[index+1:]...)
 			var picture Picture
 			_ = json.NewDecoder(r.Body).Decode(&picture)
-			picture.id = params["id"]
+			picture.ID = params["id"]
 			pictures = append(pictures, picture)
 			json.NewEncoder(w).Encode(picture)
 			return
@@ -109,7 +101,7 @@ func deleteBook(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	for index, item := range pictures {
-		if item.id == params["id"] {
+		if item.ID == params["id"] {
 			pictures = append(pictures[:index], pictures[index+1:]...)
 			break
 		}
@@ -144,10 +136,6 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	// Mock Data
-	pictures = append(pictures, Picture{id: "1", title: "ドラえもん"})
-	pictures = append(pictures, Picture{id: "2", title: "アンパンマン"})
 
 	// Route Hnadlers / Endpoints
 	r.HandleFunc("/", getBooks).Methods("GET")

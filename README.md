@@ -14,3 +14,12 @@
 ## Database
 
 - Firestore
+
+## backend setup
+
+```
+> cd back
+> go get -u github.com/gorilla/mux
+> go get firebase.google.com/go
+> go run main.go
+```
