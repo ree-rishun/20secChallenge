@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	firebase "firebase.google.com/go"
 )
@@ -63,6 +64,21 @@ func getPicture(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// 作品の保存
+func savePicture(w http.ResponseWriter, r *http.Request) {
+	// Firestoreへのデータ格納
+	_, _, err := client.Collection("pictures").Add(ctx, map[string]interface{}{
+		"title":	r.FormValue("title"),
+		"path":		r.FormValue("path"),
+		"createdAt":time.Now(),
+	})
+
+	// エラー
+	if err != nil {
+		log.Printf("An error has occurred: %s", err)
+	}
+}
+
 // Create a Book
 func createBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -74,47 +90,17 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(picture)
 }
 
-// Update a Book
-func updateBook(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func test(w http.ResponseWriter, r *http.Request) {
+	// ヘッダをセット
+	t, err := template.ParseFiles("template/test.html")
 
-	params := mux.Vars(r)
-
-	for index, item := range pictures {
-		if item.ID == params["id"] {
-			pictures = append(pictures[:index], pictures[index+1:]...)
-			var picture Picture
-			_ = json.NewDecoder(r.Body).Decode(&picture)
-			picture.ID = params["id"]
-			pictures = append(pictures, picture)
-			json.NewEncoder(w).Encode(picture)
-			return
-		}
-	}
-	json.NewEncoder(w).Encode(pictures)
-}
-
-// Delete a Book
-func deleteBook(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	params := mux.Vars(r)
-
-	for index, item := range pictures {
-		if item.ID == params["id"] {
-			pictures = append(pictures[:index], pictures[index+1:]...)
-			break
-		}
-	}
-	json.NewEncoder(w).Encode(pictures)
-}
-
-func getDataTest (w http.ResponseWriter, r *http.Request) {
-	dsnap, err := client.Collection("pictures").Doc("nUPs4UpO8K7ErrWICCJc").Get(ctx)
+	// エラーの場合
 	if err != nil {
-		fmt.Printf("err\n")
+		log.Fatalf("template error: %v", err)
 	}
-	fmt.Printf("Document data: %#v\n", dsnap.Data())
+
+	// テンプレート
+	err = t.Execute(w, "")
 }
 
 func main() {
@@ -139,15 +125,16 @@ func main() {
 
 	// Route Hnadlers / Endpoints
 	r.HandleFunc("/", getBooks).Methods("GET")
-	//
-	r.HandleFunc("/challenge/{id}", getPicture).Methods("GET")
+	r.HandleFunc("/challenge", createBook).Methods("POST")
+
 	// 結果の表示
 	r.HandleFunc("/gallery/{id}", getPicture).Methods("GET")
-	r.HandleFunc("/challenge", createBook).Methods("POST")
-	r.HandleFunc("/api/books/{id}", deleteBook).Methods("DELETE")
 
-	// テスト
-	r.HandleFunc("/test", getDataTest).Methods("GET")
+	// 結果の保存
+	r.HandleFunc("/save", savePicture).Methods("POST")
+
+	// 結果の保存
+	r.HandleFunc("/test", test).Methods("GET")
 
 
 	// ポート指定
