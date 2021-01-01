@@ -1,0 +1,23 @@
+/*responsive*/
+  /*PC*/
+  @media screen and (min-width: 770px)
+  {
+  }
+  /*Tablet,SmartPhone*/
+  @media screen and (max-width: 770px)
+  {
+  body {
+    font-family: sans-serif;
+    overflow: hidden;
+   }
+  .button{
+    top: 568px;
+    left: 83px;
+    width: 209px;
+    height: 48px;
+    background: #FADE42 0% 0% no-repeat padding-box;
+    border: 1px solid #707070;
+    border-radius: 14px;
+    opacity: 1;
+  }
+  }
