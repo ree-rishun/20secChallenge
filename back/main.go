@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-// Book Struct (Model)
+// Book構造体
 
 type Book struct {
 	ID     string  `json:"id"`
