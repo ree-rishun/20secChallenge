@@ -41,6 +41,7 @@ func getPicture(w http.ResponseWriter, r *http.Request) {
 	// 一致するものを取得（仮の処理）
 	for _, item := range pictures {
 		if item.ID == params["id"] {
+			// テンプレート
 			err = t.Execute(w, item)
 
 			if err != nil {
@@ -104,8 +105,8 @@ func main() {
 	r := mux.NewRouter()
 
 	// Mock Data
-	pictures = append(pictures, Picture{ID: "1", Title: "Book one"})
-	pictures = append(pictures, Picture{ID: "2", Title: "Book Two"})
+	pictures = append(pictures, Picture{ID: "1", Title: "ドラえもん"})
+	pictures = append(pictures, Picture{ID: "2", Title: "アンパンマン"})
 
 	// Route Hnadlers / Endpoints
 	r.HandleFunc("/", getBooks).Methods("GET")
