@@ -21,3 +21,20 @@
     opacity: 1;
   }
   }
+    .option{
+    width: 250px;
+  }
+  .color > a{
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+  }
+  .black{
+    background-color: #000000;
+  }
+  .red{
+    background-color: #ff0000;
+  }
+  .blue{
+    background-color: #0000ff;
+  }
