@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"google.golang.org/api/option"
 	"html/template"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -28,6 +29,7 @@ type Picture struct {
 var pictures	[]Picture
 var client		*firestore.Client
 var ctx			context.Context
+var app			*firebase.App
 
 // Get All Books
 func getBooks(w http.ResponseWriter, r *http.Request) {
@@ -79,15 +81,28 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Create a Book
-func createBook(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+func saceFile() error{
+	storageClient, err := app.Storage(ctx)
 
-	var picture Picture
-	_ = json.NewDecoder(r.Body).Decode(&picture)
-	picture.ID = strconv.Itoa(rand.Intn(10000)) // Mock ID - not safe in production
-	pictures = append(pictures, picture)
-	json.NewEncoder(w).Encode(picture)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	object := "test"
+
+	// Upload an object with storage.Writer.
+	wc := storageClient.Bucket("gs://secchallenge-aac82.appspot.com").Object(object).NewWriter(ctx)
+	if _, err = io.Copy(wc, f); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
+	}
+	if err := wc.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %v", err)
+	}
+	fmt.Printf("Blob %v uploaded.\n", object)
+	return nil
 }
 
 func test(w http.ResponseWriter, r *http.Request) {
