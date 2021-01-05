@@ -23,17 +23,15 @@
         <button id="clear-button">全消し</button>
     </div>
     <form name="timer">
-        <input type="text" value="">分
-        <input type="text" value="">秒<br>
+        <input type="hidden" value="0">
+        <input type="text" value="20">秒<br>
         <input type="button" value="スタート" onclick="cntStart()">
     </form>
-    <button>
-        //スタート
-    </button>
     <script src="index.js"></script>
     <script>
 
         var timer1; //タイマーを格納する変数（タイマーID）の宣言
+        var time = 20; // timeの初期化
 
 
         //カウントダウン関数を1000ミリ秒毎に呼び出す関数
@@ -72,7 +70,7 @@
             }
             else {
                 //残り分数はintを60で割って切り捨てる
-                document.timer.elements[0].value = Math.floor(int / 60);
+                //document.timer.elements[0].value = Math.floor(int / 60);
                 //残り秒数はintを60で割った余り
                 document.timer.elements[1].value = int % 60;
             }
