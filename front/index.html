@@ -29,6 +29,7 @@
     </form>
     <script src="index.js"></script>
     <script>
+        var cvs = document.getElementById("draw-area");
 
         var timer1; //タイマーを格納する変数（タイマーID）の宣言
         var time = 20; // timeの初期化
@@ -67,10 +68,13 @@
             if (int <= 0) {
                 reSet();
                 alert("時間です！");
+
+                //canvasデータを画像に変換にする関数
+                var png = cvs.toDataURL();
+                document.getElementById("newImg").src = png;
+
             }
             else {
-                //残り分数はintを60で割って切り捨てる
-                //document.timer.elements[0].value = Math.floor(int / 60);
                 //残り秒数はintを60で割った余り
                 document.timer.elements[1].value = int % 60;
             }
@@ -85,5 +89,8 @@
         }
 
     </script>
+
+    <div><img id="newImg"></div>
+
 </body>
 </html>
