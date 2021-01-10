@@ -8,11 +8,8 @@ import (
 	"github.com/gorilla/mux"
 	"google.golang.org/api/option"
 	"html/template"
-	"io"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 
 	firebase "firebase.google.com/go"
@@ -81,6 +78,7 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
 func saceFile() error{
 	storageClient, err := app.Storage(ctx)
 
@@ -103,9 +101,9 @@ func saceFile() error{
 	}
 	fmt.Printf("Blob %v uploaded.\n", object)
 	return nil
-}
+}*/
 
-func test(w http.ResponseWriter, r *http.Request) {
+func test (w http.ResponseWriter, r *http.Request) {
 	// ヘッダをセット
 	t, err := template.ParseFiles("template/test.html")
 
@@ -116,6 +114,10 @@ func test(w http.ResponseWriter, r *http.Request) {
 
 	// テンプレート
 	err = t.Execute(w, "")
+}
+
+func drawPicture (w http.ResponseWriter, r *http.Request) {
+
 }
 
 func main() {
@@ -139,8 +141,7 @@ func main() {
 	}
 
 	// Route Hnadlers / Endpoints
-	r.HandleFunc("/", getBooks).Methods("GET")
-	r.HandleFunc("/challenge", createBook).Methods("POST")
+	r.HandleFunc("/", drawPicture).Methods("GET")
 
 	// 結果の表示
 	r.HandleFunc("/gallery/{id}", getPicture).Methods("GET")

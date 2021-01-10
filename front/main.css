@@ -15,7 +15,7 @@
       left: 83px;
       width: 209px;
       height: 48px;
-      background: #FADE42 0% 0% no-repeat padding-box;
+      background: #FADE42 0 0 no-repeat padding-box;
       border: 1px solid #707070;
       border-radius: 14px;
       opacity: 1;
@@ -37,4 +37,16 @@
   }
   .blue{
     background-color: #0000ff;
+  }
+
+  #draw-area {
+    display: none;
+    border: 1px solid #000000;
+    width: 350px;
+    height: 350px;
+  }
+  #draw-readonly {
+    border: 1px solid #000000;
+    width: 350px;
+    height: 350px;
   }
