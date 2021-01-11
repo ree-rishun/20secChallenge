@@ -9,7 +9,9 @@ import (
 	"google.golang.org/api/option"
 	"html/template"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"time"
 
 	firebase "firebase.google.com/go"
@@ -37,7 +39,7 @@ func getBooks(w http.ResponseWriter, r *http.Request) {
 // 特定の絵の情報取得
 func getPicture(w http.ResponseWriter, r *http.Request) {
 	// ヘッダをセット
-	t, err := template.ParseFiles("template/index.html")
+	t, err := template.ParseFiles("template/gallery.html")
 
 	// エラーの場合
 	if err != nil {
@@ -78,30 +80,54 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-func saceFile() error{
-	storageClient, err := app.Storage(ctx)
-
-	if err != nil {
-		log.Fatal(err)
+// ファイルの保存
+func saveFile() ( w http.ResponseWriter, r *http.Request) {
+	// このハンドラ関数へのアクセスはPOSTメソッドのみ認める
+	if  (r.Method != "POST") {
+		fmt.Fprintln(w, "許可したメソッドとはことなります。")
+		return
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel()
-
-	object := "test"
-
-	// Upload an object with storage.Writer.
-	wc := storageClient.Bucket("gs://secchallenge-aac82.appspot.com").Object(object).NewWriter(ctx)
-	if _, err = io.Copy(wc, f); err != nil {
-		return fmt.Errorf("io.Copy: %v", err)
+	var file multipart.File
+	var fileHeader *multipart.FileHeader
+	var e error
+	var uploadedFileName string
+	var img []byte = make([]byte, 1024)
+	// POSTされたファイルデータを取得する
+	file , fileHeader , e = r.FormFile ("image")
+	if (e != nil) {
+		fmt.Fprintln(w, "ファイルアップロードを確認できませんでした。")
+		return
 	}
-	if err := wc.Close(); err != nil {
-		return fmt.Errorf("Writer.Close: %v", err)
+	uploadedFileName = fileHeader.Filename
+	// サーバー側に保存するために空ファイルを作成
+	var saveImage *os.File
+	saveImage, e = os.Create("./" + uploadedFileName)
+	if (e != nil) {
+		fmt.Fprintln(w, "サーバ側でファイル確保できませんでした。")
+		return
 	}
-	fmt.Printf("Blob %v uploaded.\n", object)
-	return nil
-}*/
+	defer saveImage.Close()
+	defer file.Close()
+	var tempLength int64 =0
+	for {
+		// 何byte読み込んだかを取得
+		n , e := file.Read(img)
+		// 読み混んだバイト数が0を返したらループを抜ける
+		if (n == 0) {
+			fmt.Println(e)
+			break
+		}
+		if (e != nil) {
+			fmt.Println(e)
+			fmt.Fprintln(w, "アップロードされたファイルデータのコピーに失敗。")
+			return
+		}
+		saveImage.WriteAt(img, tempLength)
+		tempLength = int64(n) + tempLength
+	}
+	fmt.Fprintf(w, "文字列HTTPとして出力させる")
+	return
+}
 
 func test (w http.ResponseWriter, r *http.Request) {
 	// ヘッダをセット
@@ -113,17 +139,24 @@ func test (w http.ResponseWriter, r *http.Request) {
 	}
 
 	// テンプレート
-	err = t.Execute(w, "")
+	err = t.Execute(w, nil)
 }
 
 func drawPicture (w http.ResponseWriter, r *http.Request) {
 
+	// ヘッダをセット
+	t, err := template.ParseFiles("template/index.html")
+
+	// エラーの場合
+	if err != nil {
+		log.Fatalf("template error: %v", err)
+	}
+
+	// テンプレート
+	err = t.Execute(w, nil)
 }
 
 func main() {
-	// Initiate Router
-	r := mux.NewRouter()
-
 	// Firebaseの設定
 	ctx = context.Background()
 	sa := option.WithCredentialsFile("key/secchallenge-aac82-firebase-adminsdk-du7lm-5dd831a3cb.json")
@@ -139,6 +172,15 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+
+	// Initiate Router
+	r := mux.NewRouter()
+
+	// CSSの関連付け
+	// r.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources/"))))
+	// r.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources/"))))
+	r.PathPrefix("/resources/").Handler(http.StripPrefix("/resources/", http.FileServer(http.Dir("resources/"))))
 
 	// Route Hnadlers / Endpoints
 	r.HandleFunc("/", drawPicture).Methods("GET")

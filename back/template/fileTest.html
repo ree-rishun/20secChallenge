@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!-- template用のhtmlファイル -->
+<html>
+<head>
+    <title>ファイルアップロードテスト</title>
+</head>
+<body>
+<div class="container">
+    <h1>ファイルアップロードテスト</h1>
+    <form method="post" action="http://localhost:11180/upload" enctype="multipart/form-data">
+        <fieldset>
+            <input type="file" name="image" id="upload_files" multiple="multiple">
+            <input type="submit" name="submit" value="アップロード開始">
+        </fieldset>
+    </form>
+</div>
+</body>
+</html>

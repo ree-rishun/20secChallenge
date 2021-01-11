@@ -3,22 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <title>{{.Title}} | #20秒チャレンジ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SNS -->
     <meta name="twitter:site" content="@reerishun">
-    <meta name="twitter:text:title" content="{{.Title}} | #20秒チャレンジ">
-    <meta name="twitter:image" content="{{.Path}}">
+    <meta name="twitter:text:title" content="#20秒チャレンジ">
+    <meta name="twitter:image" content="">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:creator" content="@reerishun">
-    <meta property="og:title" content="{{.Title}} | #20秒チャレンジ" />
+    <meta property="og:title" content="#20秒チャレンジ" />
     <meta property="og:type" content="website">
     <meta property="og:url" content="">
-    <meta property="og:site_name" content="{{.Title}} | #20秒チャレンジ">
+    <meta property="og:site_name" content="#20秒チャレンジ">
     <meta property="og:description" content="20秒で絵を描き上げよう！">
-    <meta property="og:image" content="{{.Path}}">
+    <meta property="og:image" content="">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/resources/style/main.css">
+
+    <!-- JS -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
-    <h1>{{.Title}}</h1>
-    <img src="{{.Path}}">
+<input
+        type="text"
+        name="name"
+        placeholder="お題を入力">
+<div>
+    <canvas id="draw-area" width="375px" height="375px"></canvas>
+    <div id="draw-readonly"></div>
+</div>
+
+<div>
+    <button id="clear-button">全消し</button>
+</div>
+
+<form name="timer">
+    <input type="hidden" value="0">
+    <input type="number" value="20">秒<br>
+    <input type="button" value="スタート" onclick="cntStart()">
+</form>
+
+
+<a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="20秒チャレンジ" data-show-count="false">aaa</a>
+
+<div><img id="newImg"></div>
+
+<script src="/resources/js/index.js"></script>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script>
+    let cvs = document.getElementById("draw-area");
+
+    let timer1; //タイマーを格納する変数（タイマーID）の宣言
+    const time = 20; // timeの初期化
+    let count = 0;
+
+    //カウントダウン関数を1000ミリ秒毎に呼び出す関数
+    function cntStart() {
+        document.timer.elements[2].disabled = true;
+        timer1 = setInterval("countDown()", 1000);
+        document.getElementById("draw-readonly").style.display ="none";
+        document.getElementById("draw-area").style.display ="block";
+    }
+
+    function countUp () {
+        console.log(count++);
+    }
+
+    //カウントダウン関数
+    function countDown() {
+        let min = document.timer.elements[0].value;
+        let sec = document.timer.elements[1].value;
+
+        if (min == "") {
+            alert("時刻を設定してください！");
+            reSet();
+        }
+        else {
+            if (min == "") min = 0;
+            min = parseInt(min);
+
+            if (sec == "") sec = 0;
+            sec = parseInt(sec);
+
+            tmWrite(min * 60 + sec - 1);
+        }
+    }
+
+    //残り時間を書き出す関数
+    function tmWrite(int) {
+        int = parseInt(int);
+
+        if (int <= 0) {
+            reSet();
+            alert("時間です！");
+
+            //canvasデータを画像に変換にする関数
+            const png = cvs.toDataURL();
+            document.getElementById("newImg").src = png;
+        }
+        else {
+            //残り秒数はintを60で割った余り
+            document.timer.elements[1].value = int % 60;
+        }
+    }
+
+    //フォームを初期状態に戻す（リセット）関数
+    function reSet() {
+        document.timer.elements[0].value = "0";
+        document.timer.elements[1].value = "20";
+        document.timer.elements[2].disabled = false;
+        clearInterval(timer1);
+    }
+
+</script>
+
 </body>
 </html>
