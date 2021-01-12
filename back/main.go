@@ -8,13 +8,24 @@ import (
 	"github.com/gorilla/mux"
 	"google.golang.org/api/option"
 	"html/template"
+	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
 	firebase "firebase.google.com/go"
+	"cloud.google.com/go/storage"
+	"google.golang.org/appengine"	// go get "google.golang.org/appengine"
+)
+
+var (
+	storageClient *storage.Client
+
+	// Set this in app.yaml when running in production.
+	bucket = os.Getenv("GCLOUD_STORAGE_BUCKET")
 )
 
 // 絵の構造体
@@ -80,8 +91,43 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// 画像のアップロード
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	ctx := appengine.NewContext(r)
+
+	f, fh, err := r.FormFile("file")
+	if err != nil {
+		msg := fmt.Sprintf("Could not get file: %v", err)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	defer f.Close()
+
+	sw := storageClient.Bucket(bucket).Object(fh.Filename).NewWriter(ctx)
+	if _, err := io.Copy(sw, f); err != nil {
+		msg := fmt.Sprintf("Could not write file: %v", err)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	if err := sw.Close(); err != nil {
+		msg := fmt.Sprintf("Could not put file: %v", err)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
+
+	fmt.Fprintf(w, "Successful! URL: https://storage.googleapis.com%s", u.EscapedPath())
+}
+
 // ファイルの保存
-func saveFile() ( w http.ResponseWriter, r *http.Request) {
+func saveFile ( w http.ResponseWriter, r *http.Request) {
 	// このハンドラ関数へのアクセスはPOSTメソッドのみ認める
 	if  (r.Method != "POST") {
 		fmt.Fprintln(w, "許可したメソッドとはことなります。")
@@ -168,6 +214,7 @@ func main() {
 
 	// Firestoreのインスタンスを取得
 	client, err = app.Firestore(ctx)
+	storageClient, err = storage.NewClient(ctx, sa)
 
 	if err != nil {
 		log.Fatalln(err)
@@ -177,10 +224,10 @@ func main() {
 	// Initiate Router
 	r := mux.NewRouter()
 
-	// CSSの関連付け
-	// r.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources/"))))
-	// r.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources/"))))
-	r.PathPrefix("/resources/").Handler(http.StripPrefix("/resources/", http.FileServer(http.Dir("resources/"))))
+	// 静的ファイルのルーティング
+	// r.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	// r.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 
 	// Route Hnadlers / Endpoints
 	r.HandleFunc("/", drawPicture).Methods("GET")
@@ -190,6 +237,9 @@ func main() {
 
 	// 結果の保存
 	r.HandleFunc("/save", savePicture).Methods("POST")
+
+	// 結果の保存
+	r.HandleFunc("/saveImage", saveFile).Methods("POST")
 
 	// 結果の保存
 	r.HandleFunc("/test", test).Methods("GET")

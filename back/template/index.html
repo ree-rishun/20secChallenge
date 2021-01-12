@@ -19,16 +19,21 @@
     <meta property="og:image" content="">
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="/resources/style/main.css">
+    <link rel="stylesheet" type="text/css" href="../static/style/main.css">
 
     <!-- JS -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
 <input
-        type="text"
-        name="name"
-        placeholder="お題を入力">
+    type="text"
+    name="name"
+    placeholder="お題を入力">
+
+<input
+    type="file"
+    name="image">
+
 <div>
     <canvas id="draw-area" width="375px" height="375px"></canvas>
     <div id="draw-readonly"></div>
@@ -49,13 +54,15 @@
 
 <div><img id="newImg"></div>
 
-<script src="/resources/js/index.js"></script>
+<script src="../static/js/index.js"></script>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <script>
     let cvs = document.getElementById("draw-area");
+    const xhr = new XMLHttpRequest();
+
+    const limit = 3;    // 制限時間の宣言
 
     let timer1; //タイマーを格納する変数（タイマーID）の宣言
-    const time = 20; // timeの初期化
     let count = 0;
 
     //カウントダウン関数を1000ミリ秒毎に呼び出す関数
@@ -99,19 +106,29 @@
             alert("時間です！");
 
             //canvasデータを画像に変換にする関数
-            const png = cvs.toDataURL();
+            const png = cvs.toDataURL("image/png");
+            console.log(png)
             document.getElementById("newImg").src = png;
-        }
-        else {
+
+            // 画像を保存
+            saveImage(png);
+        } else {
             //残り秒数はintを60で割った余り
             document.timer.elements[1].value = int % 60;
         }
     }
 
+    function saveImage (image) {
+        xhr.open('POST', 'http://localhost:8000/saveImage');
+        xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+        // フォームに入力した値をリクエストとして設定
+        xhr.send('title=Test&image=' + image);
+    }
+
     //フォームを初期状態に戻す（リセット）関数
     function reSet() {
         document.timer.elements[0].value = "0";
-        document.timer.elements[1].value = "20";
+        document.timer.elements[1].value = limit;
         document.timer.elements[2].disabled = false;
         clearInterval(timer1);
     }
