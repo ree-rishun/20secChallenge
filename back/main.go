@@ -25,7 +25,7 @@ var (
 	storageClient *storage.Client
 
 	// Set this in app.yaml when running in production.
-	bucket = os.Getenv("GCLOUD_STORAGE_BUCKET")
+	bucket = "secchallenge-aac82.appspot.com"
 )
 
 // 絵の構造体
@@ -202,6 +202,25 @@ func drawPicture (w http.ResponseWriter, r *http.Request) {
 	err = t.Execute(w, nil)
 }
 
+func formHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, formHTML)
+}
+
+const formHTML = `<!DOCTYPE html>
+<html>
+  <head>
+    <title>Storage</title>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+      <input type="file" name="file">
+      <input type="submit">
+    </form>
+  </body>
+</html>`
+
+
 func main() {
 	// Firebaseの設定
 	ctx = context.Background()
@@ -239,10 +258,12 @@ func main() {
 	r.HandleFunc("/save", savePicture).Methods("POST")
 
 	// 結果の保存
-	r.HandleFunc("/saveImage", saveFile).Methods("POST")
+	// r.HandleFunc("/saveImage", uploadHandler).Methods("POST")
+	r.HandleFunc("/test", formHandler)
+	r.HandleFunc("/upload", uploadHandler)
 
 	// 結果の保存
-	r.HandleFunc("/test", test).Methods("GET")
+	// r.HandleFunc("/test", test).Methods("GET")
 
 
 	// ポート指定
