@@ -10,7 +10,7 @@
 <body>
     <script>
     </script>
-    <input type="text" name="name" placeholder="お題を入力"></p>
+    <input type="text" name="name" id="name" placeholder="お題を入力"></p>
     <div>
         <canvas id="draw-area" width="375px" height="375px"></canvas>
         <div id="draw-readonly"></div>
@@ -35,11 +35,11 @@
         function cntStart() {
             document.timer.elements[2].disabled = true;
             timer1 = setInterval("countDown()", 1000);
-            document.getElementById("draw-readonly").style.display ="none";
-            document.getElementById("draw-area").style.display ="block";
+            document.getElementById("draw-readonly").style.display = "none";
+            document.getElementById("draw-area").style.display = "block";
         }
 
-        function countUp () {
+        function countUp() {
             console.log(count++);
         }
 
@@ -48,15 +48,15 @@
             let min = document.timer.elements[0].value;
             let sec = document.timer.elements[1].value;
 
-            if (min == "") {
-                alert("時刻を設定してください！");
+            if (document.getElementById('name').value == '') {
+                alert("お題を設定してください！");
                 reSet();
             }
             else {
                 if (min == "") min = 0;
                 min = parseInt(min);
 
-                if (sec == "") sec = 0;
+                if (sec == "") sec = 20;
                 sec = parseInt(sec);
 
                 tmWrite(min * 60 + sec - 1);
@@ -91,7 +91,7 @@
 
     </script>
 
-    <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="20秒チャレンジ" data-show-count="false">aaa</a>
+    <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="20秒チャレンジ" data-show-count="false">tweet</a>
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
     <div><img id="newImg"></div>
