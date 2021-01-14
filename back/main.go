@@ -35,7 +35,6 @@ type Picture struct {
 	ID		string
 	Title	string
 	Path	string
-	Image	string
 }
 
 // 絵の格納用配列
@@ -65,16 +64,11 @@ func getPicture(w http.ResponseWriter, r *http.Request) {
 
 	pictureData := dsnap.Data()
 
-	var base64img string = "data:image/png;base64," + pictureData["image"].(string)
-
-	println(base64img)
-
 	// テンプレート
 	err = t.Execute(w, Picture{
 		ID: params["id"],
 		Title: pictureData["title"].(string),
 		Path: pictureData["path"].(string),
-		Image: base64img,
 	})
 }
 
@@ -92,7 +86,6 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	_, _, err = client.Collection("pictures").Add(ctx, map[string]interface{}{
 		"title":	r.FormValue("title"),
 		"path":		path,
-		"image":	r.FormValue("file"),
 		"createdAt":time.Now(),
 	})
 
@@ -104,32 +97,24 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 
 // 画像のアップロード
 func uploadHandler (w http.ResponseWriter, r *http.Request) (string, error) {
-	// Base64の画像データを取得
+	// Base64の画像データを復元して変数に格納
 	base64img := strings.Replace(r.FormValue("file"), " ", "+", -1)
-
-	println(base64img)
 
 	// デコードしてバイナリに
 	dec, err:= base64.StdEncoding.DecodeString(base64img)
 
-	fmt.Printf("%q\n", dec)
 	if err != nil {
 		msg := fmt.Sprintf("ERROR : %v", err)
 		return "", errors.New(msg)
 	}
 
-	println(len(dec))	// 30
-	println(dec)		// [30/3246]0xc0001c6000
-	// fmt.Printf("STR  : %s\n |", dec)
-	fmt.Printf("TYPE : %T\n", dec)
 	image := bytes.NewReader(dec)
-
 	ctx := appengine.NewContext(r)
 
 	// 画像ファイル名の作成
-	fileName := strconv.FormatInt(time.Now().UnixNano(), 10) + ".png"
+	filePath := "pictures/" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".png"
 
-	sw := storageClient.Bucket(bucket).Object(fileName).NewWriter(ctx)
+	sw := storageClient.Bucket(bucket).Object(filePath).NewWriter(ctx)
 	if _, err := io.Copy(sw, image);
 
 	err != nil {
