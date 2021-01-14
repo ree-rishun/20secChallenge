@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"cloud.google.com/go/firestore"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -14,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	firebase "firebase.google.com/go"
@@ -98,32 +101,35 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var dec []byte
+	dec, _ = base64.StdEncoding.DecodeString(r.FormValue("file"))
+	image := bytes.NewReader(dec)
+
 	ctx := appengine.NewContext(r)
 
-	f, fh, err := r.FormFile("file")
-	if err != nil {
-		msg := fmt.Sprintf("Could not get file: %v", err)
-		http.Error(w, msg, http.StatusBadRequest)
-		return
-	}
-	defer f.Close()
+	// 画像ファイル名の作成
+	fileName := strconv.FormatInt(time.Now().UnixNano(), 10) + ".png"
 
-	sw := storageClient.Bucket(bucket).Object(fh.Filename).NewWriter(ctx)
-	if _, err := io.Copy(sw, f); err != nil {
+	sw := storageClient.Bucket(bucket).Object(fileName).NewWriter(ctx)
+	if _, err := io.Copy(sw, image);
+
+	err != nil {
 		msg := fmt.Sprintf("Could not write file: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
+		println(msg)
 		return
 	}
 
 	if err := sw.Close(); err != nil {
 		msg := fmt.Sprintf("Could not put file: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
+		println(msg)
 		return
 	}
 
 	u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
 
-	fmt.Fprintf(w, "Successful! URL: https://storage.googleapis.com%s", u.EscapedPath())
+	println("Successful! URL: https://storage.googleapis.com" + u.EscapedPath())
 }
 
 // ファイルの保存
