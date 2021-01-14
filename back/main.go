@@ -5,23 +5,22 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"encoding/base64"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"google.golang.org/api/option"
 	"html/template"
 	"io"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
+	"strings"
 	"time"
 
-	firebase "firebase.google.com/go"
 	"cloud.google.com/go/storage"
-	"google.golang.org/appengine"	// go get "google.golang.org/appengine"
+	firebase "firebase.google.com/go"
+	"google.golang.org/appengine" // go get "google.golang.org/appengine"
 )
 
 var (
@@ -36,6 +35,7 @@ type Picture struct {
 	ID		string
 	Title	string
 	Path	string
+	Image	string
 }
 
 // 絵の格納用配列
@@ -43,12 +43,6 @@ var pictures	[]Picture
 var client		*firestore.Client
 var ctx			context.Context
 var app			*firebase.App
-
-// Get All Books
-func getBooks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(pictures)
-}
 
 // 特定の絵の情報取得
 func getPicture(w http.ResponseWriter, r *http.Request) {
@@ -71,20 +65,34 @@ func getPicture(w http.ResponseWriter, r *http.Request) {
 
 	pictureData := dsnap.Data()
 
+	var base64img string = "data:image/png;base64," + pictureData["image"].(string)
+
+	println(base64img)
+
 	// テンプレート
 	err = t.Execute(w, Picture{
-		ID: pictureData["id"].(string),
+		ID: params["id"],
 		Title: pictureData["title"].(string),
 		Path: pictureData["path"].(string),
+		Image: base64img,
 	})
 }
 
-// 作品の保存
+// 作品情報の保存
 func savePicture(w http.ResponseWriter, r *http.Request) {
+	// 画像ファイルの保存
+	path, err := uploadHandler(w, r)
+
+	// エラー
+	if err != nil {
+		log.Printf("An error has occurred: %s", err)
+	}
+
 	// Firestoreへのデータ格納
-	_, _, err := client.Collection("pictures").Add(ctx, map[string]interface{}{
+	_, _, err = client.Collection("pictures").Add(ctx, map[string]interface{}{
 		"title":	r.FormValue("title"),
-		"path":		r.FormValue("path"),
+		"path":		path,
+		"image":	r.FormValue("file"),
 		"createdAt":time.Now(),
 	})
 
@@ -95,14 +103,25 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 }
 
 // 画像のアップロード
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "", http.StatusMethodNotAllowed)
-		return
+func uploadHandler (w http.ResponseWriter, r *http.Request) (string, error) {
+	// Base64の画像データを取得
+	base64img := strings.Replace(r.FormValue("file"), " ", "+", -1)
+
+	println(base64img)
+
+	// デコードしてバイナリに
+	dec, err:= base64.StdEncoding.DecodeString(base64img)
+
+	fmt.Printf("%q\n", dec)
+	if err != nil {
+		msg := fmt.Sprintf("ERROR : %v", err)
+		return "", errors.New(msg)
 	}
 
-	var dec []byte
-	dec, _ = base64.StdEncoding.DecodeString(r.FormValue("file"))
+	println(len(dec))	// 30
+	println(dec)		// [30/3246]0xc0001c6000
+	// fmt.Printf("STR  : %s\n |", dec)
+	fmt.Printf("TYPE : %T\n", dec)
 	image := bytes.NewReader(dec)
 
 	ctx := appengine.NewContext(r)
@@ -117,83 +136,22 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		msg := fmt.Sprintf("Could not write file: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
 		println(msg)
-		return
+		return "", errors.New(msg)
 	}
 
 	if err := sw.Close(); err != nil {
 		msg := fmt.Sprintf("Could not put file: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
 		println(msg)
-		return
+		return "", errors.New(msg)
 	}
 
 	u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
 
-	println("Successful! URL: https://storage.googleapis.com" + u.EscapedPath())
+	return "https://storage.googleapis.com" + u.EscapedPath(), nil
 }
 
-// ファイルの保存
-func saveFile ( w http.ResponseWriter, r *http.Request) {
-	// このハンドラ関数へのアクセスはPOSTメソッドのみ認める
-	if  (r.Method != "POST") {
-		fmt.Fprintln(w, "許可したメソッドとはことなります。")
-		return
-	}
-	var file multipart.File
-	var fileHeader *multipart.FileHeader
-	var e error
-	var uploadedFileName string
-	var img []byte = make([]byte, 1024)
-	// POSTされたファイルデータを取得する
-	file , fileHeader , e = r.FormFile ("image")
-	if (e != nil) {
-		fmt.Fprintln(w, "ファイルアップロードを確認できませんでした。")
-		return
-	}
-	uploadedFileName = fileHeader.Filename
-	// サーバー側に保存するために空ファイルを作成
-	var saveImage *os.File
-	saveImage, e = os.Create("./" + uploadedFileName)
-	if (e != nil) {
-		fmt.Fprintln(w, "サーバ側でファイル確保できませんでした。")
-		return
-	}
-	defer saveImage.Close()
-	defer file.Close()
-	var tempLength int64 =0
-	for {
-		// 何byte読み込んだかを取得
-		n , e := file.Read(img)
-		// 読み混んだバイト数が0を返したらループを抜ける
-		if (n == 0) {
-			fmt.Println(e)
-			break
-		}
-		if (e != nil) {
-			fmt.Println(e)
-			fmt.Fprintln(w, "アップロードされたファイルデータのコピーに失敗。")
-			return
-		}
-		saveImage.WriteAt(img, tempLength)
-		tempLength = int64(n) + tempLength
-	}
-	fmt.Fprintf(w, "文字列HTTPとして出力させる")
-	return
-}
-
-func test (w http.ResponseWriter, r *http.Request) {
-	// ヘッダをセット
-	t, err := template.ParseFiles("template/test.html")
-
-	// エラーの場合
-	if err != nil {
-		log.Fatalf("template error: %v", err)
-	}
-
-	// テンプレート
-	err = t.Execute(w, nil)
-}
-
+// 絵の新規作成ページ
 func drawPicture (w http.ResponseWriter, r *http.Request) {
 
 	// ヘッダをセット
@@ -207,25 +165,6 @@ func drawPicture (w http.ResponseWriter, r *http.Request) {
 	// テンプレート
 	err = t.Execute(w, nil)
 }
-
-func formHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, formHTML)
-}
-
-const formHTML = `<!DOCTYPE html>
-<html>
-  <head>
-    <title>Storage</title>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <form method="POST" action="/upload" enctype="multipart/form-data">
-      <input type="file" name="file">
-      <input type="submit">
-    </form>
-  </body>
-</html>`
-
 
 func main() {
 	// Firebaseの設定
@@ -245,16 +184,13 @@ func main() {
 		log.Fatalln(err)
 	}
 
-
-	// Initiate Router
+	// 新規Routerの作成
 	r := mux.NewRouter()
 
 	// 静的ファイルのルーティング
-	// r.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-	// r.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 
-	// Route Hnadlers / Endpoints
+	// トップページ（新規作成ページ）
 	r.HandleFunc("/", drawPicture).Methods("GET")
 
 	// 結果の表示
@@ -262,15 +198,6 @@ func main() {
 
 	// 結果の保存
 	r.HandleFunc("/save", savePicture).Methods("POST")
-
-	// 結果の保存
-	// r.HandleFunc("/saveImage", uploadHandler).Methods("POST")
-	r.HandleFunc("/test", formHandler)
-	r.HandleFunc("/upload", uploadHandler)
-
-	// 結果の保存
-	// r.HandleFunc("/test", test).Methods("GET")
-
 
 	// ポート指定
 	log.Fatal(http.ListenAndServe(":8000", r))

@@ -27,7 +27,7 @@
 <body>
 <input
     type="text"
-    name="name"
+    name="title"
     placeholder="お題を入力">
 
 <input
@@ -103,7 +103,6 @@
 
         if (int <= 0) {
             reSet();
-            alert("時間です！");
 
             //canvasデータを画像に変換にする関数
             console.log(cvs);
@@ -119,21 +118,13 @@
     }
 
     function saveImage (image) {
-        xhr.open('POST', 'http://localhost:8000/upload');
+
+        xhr.open('POST', 'http://localhost:8000/save');
         xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
         // フォームに入力した値をリクエストとして設定
-        // console.log(image);
-        let base64Data = image.split(',')[1], // Data URLからBase64のデータ部分のみを取得
-            data = window.atob(base64Data), // base64形式の文字列をデコード
-            buff = new ArrayBuffer(data.length),
-            arr = new Uint8Array(buff),
-            blob, i, dataLen;
-        // blobの生成
-        for( i = 0, dataLen = data.length; i < dataLen; i++){
-            arr[i] = data.charCodeAt(i);
-        }
-        blob = new Blob([arr], {type: 'image/png'});
-        xhr.send('title=Test&file=' + base64Data);
+        let base64Data = image.split(',')[1];
+
+        xhr.send('title=' + document.getElementsByName('title')[0].value + '&file=' + base64Data);
     }
 
     //フォームを初期状態に戻す（リセット）関数

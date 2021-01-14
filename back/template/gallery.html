@@ -5,6 +5,14 @@
     <title>Title</title>
 </head>
 <body>
-
+<input type="text" id="text">
+<img src="{{.Image}}" id="img">
+<img src="{{.Path}}">
+<button onclick="change()">change</button>
+<script>
+    function change () {
+        document.getElementById("img").src = document.getElementById("text").value
+    }
+</script>
 </body>
 </html>
