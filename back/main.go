@@ -8,11 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -133,45 +131,7 @@ func uploadHandler (w http.ResponseWriter, r *http.Request) (string, error) {
 		return "", errors.New(msg)
 	}
 
-	u, _ := url.Parse("/" + bucket + "/" + sw.Attrs().Name)
-	generateV4GetObjectSignedURL(filePath)
-
-	return "https://storage.googleapis.com" + u.EscapedPath(), nil
-}
-
-func generateV4GetObjectSignedURL(object string) (string, error) {
-
-	jsonKey, err := ioutil.ReadFile("key/secchallenge-aac82-firebase-adminsdk-du7lm-5dd831a3cb.json")
-	if err != nil {
-		return "", fmt.Errorf("ioutil.ReadFile: %v", err)
-	}
-	conf, err := google.JWTConfigFromJSON(jsonKey)
-	if err != nil {
-		return "", fmt.Errorf("google.JWTConfigFromJSON: %v", err)
-	}
-	opts := &storage.SignedURLOptions{
-		Scheme:         storage.SigningSchemeV4,
-		Method:         "GET",
-		GoogleAccessID: conf.Email,
-		PrivateKey:     conf.PrivateKey,
-		Expires:        time.Now().Add(15 * time.Minute),
-	}
-
-	// println(bucket)
-	println(object)
-	// print(opts)
-
-	u, err := storage.SignedURL(bucket, object, opts)
-	if err != nil {
-		return "", fmt.Errorf("storage.SignedURL: %v", err)
-	}
-
-	print("Generated GET signed URL:")
-	println("%q\n", u)
-
-	print("You can use this URL with any user agent, for example:")
-	println("curl %q\n", u)
-	return u, nil
+	return "https://firebasestorage.googleapis.com/v0/b/" + bucket + "/o/" + url.QueryEscape(filePath) + "?alt=media", nil
 }
 
 // 絵の新規作成ページ
