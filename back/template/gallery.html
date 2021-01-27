@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{.Title}}</title>
+
+    <meta name="twitter:site" content="">
+    <meta name="twitter:text:title" content="{{.Title}}">
+    <meta name="twitter:image" content="{{.Path}}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@reerishun">
+    <meta property="og:title" content="ReE=Rishun" />
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:site_name" content="{{.Title}}">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="{{.Path}}">
 </head>
 <body>
 <img src="{{.Path}}">
+<h2>{{.Title}}</h2>
 </body>
 </html>
