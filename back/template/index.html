@@ -120,6 +120,13 @@
         // フォームに入力した値をリクエストとして設定
         let base64Data = image.split(',')[1];
 
+        xhr.onreadystatechange = function() { // 状態が変化すると関数が呼び出されます。
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                // ここに画像のリンクが来る
+                console.log(this.responseText)
+            }
+        }
+
         xhr.send('title=' + document.getElementsByName('title')[0].value + '&file=' + base64Data);
     }
 

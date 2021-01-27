@@ -5,6 +5,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -83,7 +84,7 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Firestoreへのデータ格納
-	_, _, err = client.Collection("pictures").Add(ctx, map[string]interface{}{
+	id, _, err := client.Collection("pictures").Add(ctx, map[string]interface{}{
 		"title":	r.FormValue("title"),
 		"path":		path,
 		"createdAt":time.Now(),
@@ -93,6 +94,9 @@ func savePicture(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("An error has occurred: %s", err)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(id.ID)
 }
 
 // 画像のアップロード
