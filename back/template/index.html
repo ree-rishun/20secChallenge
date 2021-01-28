@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>{{.Title}} | #20秒チャレンジ</title>
+    <title>絵を描く | #20秒チャレンジ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SNS -->
@@ -19,6 +19,7 @@
     <meta property="og:image" content="">
 
     <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="../static/style/reset.css">
     <link rel="stylesheet" type="text/css" href="../static/style/main.css">
 
     <!-- JS -->
@@ -26,29 +27,31 @@
 </head>
 <body>
 <input
+    id="draw-title"
     type="text"
     name="title"
     placeholder="お題を入力">
 
 <div>
     <canvas id="draw-area" width="375px" height="375px"></canvas>
-    <div id="draw-readonly"></div>
+    <div id="draw-readonly">
+        <button
+                id="start-button"
+                type="button"
+                onclick="cntStart()">
+            START
+        </button>
+    </div>
+    <div id="draw-result">
+        <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="20秒チャレンジ" data-show-count="false">ツイートする</a>
+    </div>
 </div>
 
-<div>
-    <button id="clear-button">全消し</button>
+<div id="timer-area">
+    <img src="../static/img/timer.png" alt="timer">
+    <span id="timer">3</span>
 </div>
-
-<form name="timer">
-    <input type="hidden" value="0">
-    <input type="number" value="3">秒<br>
-    <input type="button" value="スタート" onclick="cntStart()">
-</form>
-
-
-<a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="20秒チャレンジ" data-show-count="false">aaa</a>
-
-<div><img id="newImg"></div>
+<button id="clear-button" style="cursor: pointer">全消し</button>
 
 <script src="../static/js/index.js"></script>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -56,17 +59,22 @@
     let cvs = document.getElementById("draw-area");
     const xhr = new XMLHttpRequest();
 
-    const limit = 3;    // 制限時間の宣言
+    const limit = 30;    // 制限時間の宣言
 
-    let timer1; //タイマーを格納する変数（タイマーID）の宣言
+    let timer; //タイマーを格納する変数（タイマーID）の宣言
     let count = 0;
 
     //カウントダウン関数を1000ミリ秒毎に呼び出す関数
-    function cntStart() {
-        document.timer.elements[2].disabled = true;
-        timer1 = setInterval("countDown()", 1000);
+    document.getElementById("start-button").onclick = function () {
+        // タイマー開始
+        timer = setInterval(
+            "countDown()",
+            1000
+        );
+
+        // カウント開始時のみ書き込み可能に
         document.getElementById("draw-readonly").style.display ="none";
-        document.getElementById("draw-area").style.display ="block";
+        document.getElementById("draw-area").style.display ="inline-block";
     }
 
     function countUp () {
@@ -75,21 +83,12 @@
 
     //カウントダウン関数
     function countDown() {
-        let min = document.timer.elements[0].value;
-        let sec = document.timer.elements[1].value;
+        document.getElementById('timer').innerText--;
 
-        if (min == "") {
-            alert("時刻を設定してください！");
-            reSet();
-        }
-        else {
-            if (min == "") min = 0;
-            min = parseInt(min);
-
-            if (sec == "") sec = 0;
-            sec = parseInt(sec);
-
-            tmWrite(min * 60 + sec - 1);
+        if (document.getElementById('timer').innerText === "0") {
+            clearInterval(timer);
+            document.getElementById("draw-area").style.display ="none";
+            document.getElementById("draw-result").style.display ="inline-block";
         }
     }
 
@@ -102,11 +101,9 @@
 
             //canvasデータを画像に変換にする関数
             console.log(cvs);
-            const png = cvs.toDataURL("image/png");
-            document.getElementById("newImg").src = png;
 
             // 画像を保存
-            saveImage(png);
+            saveImage(cvs.toDataURL("image/png"));
         } else {
             //残り秒数はintを60で割った余り
             document.timer.elements[1].value = int % 60;
