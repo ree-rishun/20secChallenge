@@ -26,6 +26,7 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
+<h1>#20秒チャレンジ</h1>
 <input
     id="draw-title"
     type="text"
@@ -33,7 +34,7 @@
     placeholder="お題を入力">
 
 <div>
-    <canvas id="draw-area" width="375px" height="375px"></canvas>
+    <canvas id="draw-area" width="320px" height="320px"></canvas>
     <div id="draw-readonly">
         <button
                 id="start-button"
@@ -43,14 +44,19 @@
         </button>
     </div>
     <div id="draw-result">
-        <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="20秒チャレンジ" data-show-count="false">ツイートする</a>
+        <button
+                id="twitter-share-button"
+                onclick="location.href='https://twitter.com/intent/tweet?text=&url=http://localhost:8000/gallery/&hashtags=20%E7%A7%92%E3%83%81%E3%83%A3%E3%83%AC%E3%83%B3%E3%82%B8'">
+            ツイートする
+        </button>
     </div>
 </div>
 
 <div id="timer-area">
     <img src="../static/img/timer.png" alt="timer">
-    <span id="timer">3</span>
+    <span id="timer">2</span>
 </div>
+
 <button id="clear-button" style="cursor: pointer">全消し</button>
 
 <script src="../static/js/index.js"></script>
@@ -64,24 +70,35 @@
     let timer; //タイマーを格納する変数（タイマーID）の宣言
     let count = 0;
 
+    let button_active = false;
+
+    // タイトル入力の確認
+    document.getElementById("draw-title").onchange = function () {
+        // 入力がされている場合のみ有効にする
+        button_active = (document.getElementById("draw-title").value !== "");
+    }
+
     //カウントダウン関数を1000ミリ秒毎に呼び出す関数
     document.getElementById("start-button").onclick = function () {
-        // タイマー開始
-        timer = setInterval(
-            "countDown()",
-            1000
-        );
+        // 文字列が入力されている場合のみ
+        if (button_active) {
+            // タイマー開始
+            timer = setInterval(
+                "countDown()",
+                1000
+            );
 
-        // カウント開始時のみ書き込み可能に
-        document.getElementById("draw-readonly").style.display ="none";
-        document.getElementById("draw-area").style.display ="inline-block";
+            // カウント開始時のみ書き込み可能に
+            document.getElementById("draw-readonly").style.display ="none";
+            document.getElementById("draw-area").style.display ="inline-block";
+        }
     }
 
     function countUp () {
         console.log(count++);
     }
 
-    //カウントダウン関数
+    // カウントダウン関数
     function countDown() {
         document.getElementById('timer').innerText--;
 
@@ -110,6 +127,7 @@
         }
     }
 
+    // 画像の保存
     function saveImage (image) {
 
         xhr.open('POST', 'http://localhost:8000/save');
@@ -120,7 +138,8 @@
         xhr.onreadystatechange = function() { // 状態が変化すると関数が呼び出されます。
             if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                 // ここに画像のリンクが来る
-                console.log(this.responseText)
+                console.log(this.responseText);
+                createLink(this.responseText);
             }
         }
 
@@ -135,6 +154,15 @@
         clearInterval(timer1);
     }
 
+    // リンクの作成
+    function createLink (id) {
+        document.getElementById("twitter-share-button").href =
+            "https://twitter.com/intent/tweet?text=" +
+            encodeURIComponent(document.getElementById("draw-title").value) +
+            "%E3%81%AE%E7%B5%B5%E3%82%92%E8%A6%8B%E3%82%8B&url=http://localhost:8000/gallery/" +
+            encodeURIComponent(id) +
+            "&hashtags=20%E7%A7%92%E3%83%81%E3%83%A3%E3%83%AC%E3%83%B3%E3%82%B8"
+    }
 </script>
 
 </body>
