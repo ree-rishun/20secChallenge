@@ -46,7 +46,7 @@
     <div id="draw-result">
         <button
                 id="twitter-share-button"
-                onclick="location.href='https://twitter.com/intent/tweet?text=&url=http://localhost:8000/gallery/&hashtags=20%E7%A7%92%E3%83%81%E3%83%A3%E3%83%AC%E3%83%B3%E3%82%B8'">
+                onclick="tweet()">
             ツイートする
         </button>
     </div>
@@ -71,6 +71,7 @@
     let count = 0;
 
     let button_active = false;
+    let twitter_link = "";
 
     // タイトル入力の確認
     document.getElementById("draw-title").onchange = function () {
@@ -106,24 +107,9 @@
             clearInterval(timer);
             document.getElementById("draw-area").style.display ="none";
             document.getElementById("draw-result").style.display ="inline-block";
-        }
-    }
-
-    //残り時間を書き出す関数
-    function tmWrite(int) {
-        int = parseInt(int);
-
-        if (int <= 0) {
-            reSet();
-
-            //canvasデータを画像に変換にする関数
-            console.log(cvs);
 
             // 画像を保存
             saveImage(cvs.toDataURL("image/png"));
-        } else {
-            //残り秒数はintを60で割った余り
-            document.timer.elements[1].value = int % 60;
         }
     }
 
@@ -136,10 +122,11 @@
         let base64Data = image.split(',')[1];
 
         xhr.onreadystatechange = function() { // 状態が変化すると関数が呼び出されます。
+            console.log("test");
             if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                 // ここに画像のリンクが来る
                 console.log(this.responseText);
-                createLink(this.responseText);
+                createLink(this.responseText.replace(/\"/g, ""));
             }
         }
 
@@ -156,12 +143,18 @@
 
     // リンクの作成
     function createLink (id) {
-        document.getElementById("twitter-share-button").href =
+        twitter_link =
             "https://twitter.com/intent/tweet?text=" +
             encodeURIComponent(document.getElementById("draw-title").value) +
             "%E3%81%AE%E7%B5%B5%E3%82%92%E8%A6%8B%E3%82%8B&url=http://localhost:8000/gallery/" +
             encodeURIComponent(id) +
             "&hashtags=20%E7%A7%92%E3%83%81%E3%83%A3%E3%83%AC%E3%83%B3%E3%82%B8"
+        console.log(encodeURIComponent(id))
+        console.log(document.getElementById("twitter-share-button").href)
+    }
+
+    function tweet () {
+        console.log(twitter_link);
     }
 </script>
 
