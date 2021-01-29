@@ -109,7 +109,9 @@
             document.getElementById("draw-result").style.display ="inline-block";
 
             // 画像を保存
-            saveImage(cvs.toDataURL("image/png"));
+            const image_data = cvs.toDataURL("image/png");
+            saveImage(image_data);
+
         }
     }
 
@@ -129,7 +131,7 @@
                 createLink(this.responseText.replace(/\"/g, ""));
             }
         }
-
+        // APIへの送信
         xhr.send('title=' + document.getElementsByName('title')[0].value + '&file=' + base64Data);
     }
 
@@ -155,6 +157,7 @@
 
     function tweet () {
         console.log(twitter_link);
+        location.href = twitter_link;
     }
 </script>
 
