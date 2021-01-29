@@ -65,13 +65,10 @@
     let cvs = document.getElementById("draw-area");
     const xhr = new XMLHttpRequest();
 
-    const limit = 30;    // 制限時間の宣言
+    let timerID;                  //タイマーを格納する変数（タイマーID）の宣言
 
-    let timer; //タイマーを格納する変数（タイマーID）の宣言
-    let count = 0;
-
-    let button_active = false;
-    let twitter_link = "";
+    let button_active = false;  // スタートボタンを押すことができるか
+    let twitter_link = "";      // Twitter用リンク
 
     // タイトル入力の確認
     document.getElementById("draw-title").onchange = function () {
@@ -84,7 +81,7 @@
         // 文字列が入力されている場合のみ
         if (button_active) {
             // タイマー開始
-            timer = setInterval(
+            timerID = setInterval(
                 "countDown()",
                 1000
             );
@@ -95,16 +92,12 @@
         }
     }
 
-    function countUp () {
-        console.log(count++);
-    }
-
     // カウントダウン関数
     function countDown() {
         document.getElementById('timer').innerText--;
 
         if (document.getElementById('timer').innerText === "0") {
-            clearInterval(timer);
+            clearInterval(timerID);
             document.getElementById("draw-area").style.display ="none";
             document.getElementById("draw-result").style.display ="inline-block";
 
@@ -135,14 +128,6 @@
         xhr.send('title=' + document.getElementsByName('title')[0].value + '&file=' + base64Data);
     }
 
-    //フォームを初期状態に戻す（リセット）関数
-    function reSet() {
-        document.timer.elements[0].value = "0";
-        document.timer.elements[1].value = limit;
-        document.timer.elements[2].disabled = false;
-        clearInterval(timer1);
-    }
-
     // リンクの作成
     function createLink (id) {
         twitter_link =
@@ -155,6 +140,7 @@
         console.log(document.getElementById("twitter-share-button").href)
     }
 
+    // ツイート処理
     function tweet () {
         console.log(twitter_link);
         location.href = twitter_link;
