@@ -117,10 +117,8 @@
         let base64Data = image.split(',')[1];
 
         xhr.onreadystatechange = function() { // 状態が変化すると関数が呼び出されます。
-            console.log("test");
             if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                 // ここに画像のリンクが来る
-                console.log(this.responseText);
                 createLink(this.responseText.replace(/\"/g, ""));
             }
         }
@@ -136,13 +134,10 @@
             "%E3%81%AE%E7%B5%B5%E3%82%92%E8%A6%8B%E3%82%8B&url=http://localhost:8000/gallery/" +
             encodeURIComponent(id) +
             "&hashtags=20%E7%A7%92%E3%83%81%E3%83%A3%E3%83%AC%E3%83%B3%E3%82%B8"
-        console.log(encodeURIComponent(id))
-        console.log(document.getElementById("twitter-share-button").href)
     }
 
     // ツイート処理
     function tweet () {
-        console.log(twitter_link);
         location.href = twitter_link;
     }
 </script>
