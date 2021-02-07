@@ -153,10 +153,11 @@ func drawPicture (w http.ResponseWriter, r *http.Request) {
 	err = t.Execute(w, nil)
 }
 
+// メイン処理
 func main() {
 	// Firebaseの設定
 	ctx = context.Background()
-	sa := option.WithCredentialsFile("key/secchallenge-aac82-firebase-adminsdk-du7lm-5dd831a3cb.json")
+	sa := option.WithCredentialsFile("./key/secchallenge-aac82-firebase-adminsdk-du7lm-5dd831a3cb.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 
 	if err != nil {

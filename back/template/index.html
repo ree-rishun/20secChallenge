@@ -74,6 +74,7 @@
     document.getElementById("draw-title").onchange = function () {
         // 入力がされている場合のみ有効にする
         button_active = (document.getElementById("draw-title").value !== "");
+        document.getElementById("start-button").style.backgroundColor = "#ff0000";
     }
 
     //カウントダウン関数を1000ミリ秒毎に呼び出す関数
