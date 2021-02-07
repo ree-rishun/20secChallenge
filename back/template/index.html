@@ -70,10 +70,13 @@
     let button_active = false;  // スタートボタンを押すことができるか
     let twitter_link = "";      // Twitter用リンク
 
+    const domain = "http://localhost:8000";
+
     // タイトル入力の確認
     document.getElementById("draw-title").onchange = function () {
         // 入力がされている場合のみ有効にする
         button_active = (document.getElementById("draw-title").value !== "");
+        // 有効時にボタンの色を赤色に変更する
         document.getElementById("start-button").style.backgroundColor = "#ff0000";
     }
 
@@ -115,7 +118,7 @@
     // 画像の保存
     function saveImage (image) {
 
-        xhr.open('POST', 'http://localhost:8000/save');
+        xhr.open('POST', domain + '/save');
         xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
         // フォームに入力した値をリクエストとして設定
         let base64Data = image.split(',')[1];
@@ -135,14 +138,17 @@
         twitter_link =
             "https://twitter.com/intent/tweet?text=" +
             encodeURIComponent(document.getElementById("draw-title").value) +
-            "%E3%81%AE%E7%B5%B5%E3%82%92%E8%A6%8B%E3%82%8B&url=http://localhost:8000/gallery/" +
+            "%E3%81%AE%E7%B5%B5%E3%82%92%E8%A6%8B%E3%82%8B&url=" +
+            domain +
+            "/gallery/" +
             encodeURIComponent(id) +
             "&hashtags=20%E7%A7%92%E3%83%81%E3%83%A3%E3%83%AC%E3%83%B3%E3%82%B8"
+        console.log(twitter_link);
     }
 
     // ツイート処理
     function tweet () {
-        location.href = twitter_link;
+        window.open(twitter_link, '_blank');
     }
 </script>
 
