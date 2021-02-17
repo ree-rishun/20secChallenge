@@ -1,33 +1,34 @@
-const canvas = document.querySelector("#draw-area");
-const context = canvas.getContext("2d");
+const cvs = document.querySelector("#draw-area");
+const ctx = cvs.getContext("2d");
 
-canvas.addEventListener("mousemove", event => {
+cvs.addEventListener("mousemove", event => {
   draw(event.layerX, event.layerY);
 });
-canvas.addEventListener("touchmove", event => {
+cvs.addEventListener("touchmove", event => {
   draw(event.layerX, event.layerY);
 });
 
-canvas.addEventListener("mousedown", () => {
-  context.beginPath();
+cvs.addEventListener("mousedown", () => {
+  ctx.beginPath();
   isDrag = true;
 });
-canvas.addEventListener("mouseup", () => {
-  context.closePath();
+cvs.addEventListener("mouseup", () => {
+  ctx.closePath();
   isDrag = false;
 });
-canvas.addEventListener("touchstart", () => {
-  context.beginPath();
+cvs.addEventListener("touchstart", () => {
+  ctx.beginPath();
   isDrag = true;
 });
-canvas.addEventListener("touchend", () => {
-  context.closePath();
+cvs.addEventListener("touchend", () => {
+  ctx.closePath();
   isDrag = false;
 });
 
 const clearButton = document.querySelector("#clear-button");
 clearButton.addEventListener("click", () => {
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgb(255, 255,255)';
+  ctx.fillRect(0, 0, cvs.width, cvs.height);
 });
 
 let isDrag = false;
@@ -36,7 +37,7 @@ function draw(x, y) {
     return;
   }
 
-  context.lineWidth = 5;
-  context.lineTo(x, y);
-  context.stroke();
+  ctx.lineWidth = 5;
+  ctx.lineTo(x, y);
+  ctx.stroke();
 }

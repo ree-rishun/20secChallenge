@@ -20,6 +20,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="../static/style/reset.css">
+    <link rel="stylesheet" type="text/css" href="../static/style/common.css">
     <link rel="stylesheet" type="text/css" href="../static/style/main.css">
 
     <!-- JS -->
@@ -31,11 +32,15 @@
     id="draw-title"
     type="text"
     name="title"
-    placeholder="お題を入力">
+    placeholder="まずはお題を入力しよう！">
 
 <div>
     <canvas id="draw-area" width="320px" height="320px"></canvas>
     <div id="draw-readonly">
+        <p>
+            20秒間だけ自由に<br>
+            好きな絵を描こう！
+        </p>
         <button
                 id="start-button"
                 type="button"
@@ -44,6 +49,10 @@
         </button>
     </div>
     <div id="draw-result">
+        <p>
+            ツイートして<br>
+            みんなにシェアしよう！
+        </p>
         <button
                 id="twitter-share-button"
                 onclick="tweet()">
@@ -54,7 +63,7 @@
 
 <div id="timer-area">
     <img src="../static/img/timer.png" alt="timer">
-    <span id="timer">2</span>
+    <span id="timer">20</span>
 </div>
 
 <button id="clear-button" style="cursor: pointer">全消し</button>
@@ -62,7 +71,6 @@
 <script src="../static/js/index.js"></script>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <script>
-    let cvs = document.getElementById("draw-area");
     const xhr = new XMLHttpRequest();
 
     let timerID;                  //タイマーを格納する変数（タイマーID）の宣言
@@ -78,6 +86,9 @@
         button_active = (document.getElementById("draw-title").value !== "");
         // 有効時にボタンの色を赤色に変更する
         document.getElementById("start-button").style.backgroundColor = "#ff0000";
+
+        ctx.fillStyle = 'rgb(255,255,255)';
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
     }
 
     //カウントダウン関数を1000ミリ秒毎に呼び出す関数

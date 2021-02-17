@@ -179,7 +179,7 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 
 	// トップページ（新規作成ページ）
-	r.HandleFunc("/", drawPicture).Methods("GET")
+	r.HandleFunc(	"/", drawPicture).Methods("GET")
 
 	// 結果の表示
 	r.HandleFunc("/gallery/{id}", getPicture).Methods("GET")

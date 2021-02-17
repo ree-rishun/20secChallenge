@@ -1,0 +1,17 @@
+h1 {
+    display: inline-block;
+    height: 70px;
+    width: 300px;
+    color: rgba(0, 0, 0, 0);
+    user-select: none;
+    background-image: url("../img/logo.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 70px;
+}
+
+body {
+    text-align: center;
+    background-color: #eae3e3;
+    min-height: 100vh;
+}

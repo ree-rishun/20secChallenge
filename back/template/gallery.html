@@ -2,9 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>{{.Title}}</title>
+    <title>{{.Title}} | #20秒チャレンジ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="twitter:site" content="">
+    <!-- SNS -->
+    <meta name="twitter:site" content="{{.Title}} | #20秒チャレンジ">
     <meta name="twitter:text:title" content="{{.Title}}">
     <meta name="twitter:image" content="{{.Path}}">
     <meta name="twitter:card" content="summary_large_image">
@@ -15,9 +17,33 @@
     <meta property="og:site_name" content="{{.Title}}">
     <meta property="og:description" content="">
     <meta property="og:image" content="{{.Path}}">
+
+    <!-- font -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="../static/style/reset.css">
+    <link rel="stylesheet" type="text/css" href="../static/style/common.css">
+    <link rel="stylesheet" type="text/css" href="../static/style/gallery.css">
 </head>
 <body>
-    <img src="{{.Path}}">
-    <h2>{{.Title}}</h2>
+
+<h1>#20秒チャレンジ</h1>
+
+<img
+        src="{{.Path}}"
+        class="gallery_image"
+        alt="{{.Title}}">
+<h2
+        class="gallery_title">
+    {{.Title}}
+</h2>
+
+<a
+        href="/"
+        class="draw_button">
+    絵をかいてみる
+</a>
 </body>
 </html>
