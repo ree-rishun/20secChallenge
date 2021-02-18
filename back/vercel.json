@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "name": "20secChallenge",
+  "builds": [
+    { "src": "*.go", "use": "@vercel/go" }
+  ]
+}
