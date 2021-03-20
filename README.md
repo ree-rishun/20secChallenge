@@ -6,14 +6,17 @@
 
 ## Languages
 
-- HTML5
-- CSS
-- JavaScript
-- Go
+- Front
+  - HTML5
+  - CSS
+  - JavaScript
+- Server
+  - Go
 
-## Database
+## Infrastructure
 
 - Firestore
+- Firebase Cloud Storage
 
 ## backend setup
 
