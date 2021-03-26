@@ -1,9 +1,5 @@
 # #20秒チャレンジ
 
-## TestPage
-
-[GitHubPages](https://ree-rishun.github.io/20secChallenge/front/index.html)
-
 ## Languages
 
 - Front
