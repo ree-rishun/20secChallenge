@@ -6,6 +6,7 @@
   - HTML5
   - CSS
   - JavaScript
+  - jQuery
 - Server
   - Go
 
